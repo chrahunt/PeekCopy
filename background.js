@@ -31,22 +31,22 @@ chrome.pageAction.onClicked.addListener(function(disregard) {
 chrome.runtime.onConnect.addListener(function(port) {
   if (port.name === "peeks") {
     port.onMessage.addListener(function(msg) {
-      console.log("Recieved message: " + msg.first);
+      console.log("Recieved message: " + JSON.stringify(msg.data));
       // Create array with word
-      var word = msg.first;
+      var newWords = msg.data;
 
       // Add existing words to store
       // Is there a possibility that this will not fetch?
       store.get("words", function(result) {
-        console.debug("Word entered: " + word);
+        console.debug("Words entered: " + newWords);
         if (result.words) {
           var words = result.words;
           console.debug("Words retrieved: " + JSON.stringify(words));
         } else {
           var words = [];
-          console.debug("No words retrieved: " + JSON.stringify(result));
+          console.debug("No words retrieved");
         }
-        words.push(word);
+        words = words.concat(newWords);
         console.debug("Result of concatenation: " + JSON.stringify(words));
 
         store.set({ "words": words });
