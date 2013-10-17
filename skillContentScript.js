@@ -17,6 +17,16 @@ function delayedCheck(element, callback) {
   setTimeout(delayedCheck(element, callback), 1000);
 }
 
+/* 
+ * Add mutation observer to domElement with specified callback and config
+ */
+function addMutationObserver(domElement, callback, config) {
+  var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
+  var observer = new MutationObserver(callback);
+  observer.observe(domElement, config);
+  return observer;
+}
+
 function checkForWrapperElement() {
   delayedCheck("div#wrapper", onWrapperElementFound);
 }
@@ -24,14 +34,14 @@ function checkForWrapperElement() {
 // Add observer to wrapper to see changes in app window
 function onWrapperElementFound(wrapperDom) {
   console.debug("Wrapper element found!");
-  var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-  var observer = new MutationObserver(onWrapperChange);
   var config = { childList: true };
-  observer.observe(wrapperDom, config); 
+
+  addMutationObserver(wrapperDom, onWrapperChange, config); 
 }
 
 function onWrapperChange(mutations) {
-  // div#pp element loads more than once after page load, this ensures we get the one loaded most recently
+  // div#app element loads more than once after page load
+  // this ensures we get the one loaded most recently
   checkForAppElement();
 }
 
@@ -41,21 +51,24 @@ function checkForAppElement() {
 
 function onAppElementFound(appDom) {
   console.debug("App element found!");
-  var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-  var observer = new MutationObserver(onAppChange);
   var config = { attributes: true };
-  observer.observe(appDom, config); 
+
+  addMutationObserver(appDom, onAppChange, config);
 }
 
 function onAppChange(mutations) {
   console.debug("App element attributes changed!");
+  
+  /*
   mutations.forEach(function(mutation) {
-    //console.log("Change: " + mutation.attributeName + "; Target: " + mutation.target.getAttribute("class"));
+    console.log("Change: " + mutation.attributeName + "; Target: " + mutation.target.getAttribute("class"));
   });
+  */
 
+  // Since we only have an attribute observer on this element
   classes = mutations[0].target.getAttribute("class");
-  // Check if translate screen
 
+  // Check if translate screen is currently active
   if (!translateScreen) {
     if (classes.indexOf("translate") > -1) {
       if (classes.indexOf("correct") === -1) {
@@ -71,8 +84,6 @@ function onAppChange(mutations) {
     // For now I'm clearing out the listeners and everything prior to the next panel coming in, this may change
     if (classes.indexOf("correct") > -1) {
       console.debug("New panel coming up.");
-      // For not 
-      // clear out the rest of
       translateScreen = false;
       
       // Remove listeners from now non-existent elements?
@@ -88,10 +99,9 @@ function onAppChange(mutations) {
 // Attach a mutation observer to the session-element-container when it is found
 function onSessionElementFound(sessDom) {
   console.debug("Session element found!");
-  var MutationObserver = window.MutationObserver || window.WebKitMutationObserver;
-  var observer = new MutationObserver(onSessionElementChange);
   var config = { childList: true, characterData: true, subtree: true };
-  observer.observe(sessDom, config);
+
+  var observer = addMutationObserver(sessDom, onSessionElementChange, config);
   return observer;
 }
 
@@ -134,7 +144,7 @@ function onSessionElementChange(mutations) {
 function onMouseOver(event) {
   // Remove the onmouseover listener from the element so it can't be invoked again, which would send more data
   this.removeEventListener("mouseover", onMouseOver, false);
-  var highlighted = this.textContent;
+  var highlighted = this.textContent.trim();
 
   console.log("Got: " + highlighted);
 
@@ -174,8 +184,8 @@ function onMouseOver(event) {
     var combinedDefinitions = [];
     var definitions = [];
 
+    // Get definition information
     for (var i = 0; i < rows.length; i++) {
-      // Get specific row that we're looking at
       var row = rows.item(i);
       
       if (firstRow) {
@@ -196,8 +206,7 @@ function onMouseOver(event) {
         }
         firstRow = false;
       } else {
-        // Rule out the possibility of conjugate or explain buttons - nevermind, these are in a separate div
-        // identify gender element
+        // TODO: identify gender element
         // Identify cases in the combined definitions when part of a definition is only concerned with a single element
         // - combined: true && child td has colspan 2 means good to go
         console.debug(rows.item(i));
@@ -205,17 +214,17 @@ function onMouseOver(event) {
 
         if (td) {
           if (combined) {
-            // two possibilities, phrase definition or singular definition
+            // Two possibilities: phrase definition or single word definition
             if (td.length > 1) {
               // Assumes that selectedCol it was set by this point, may not be a save assumption
-              singleDefinitions.push(td.item(selectedCol).textContent);
+              singleDefinitions.push(td.item(selectedCol).textContent.trim());
             } else if (td.length === 1) {
-              combinedDefinitions.push(td.item(0).textContent);
+              combinedDefinitions.push(td.item(0).textContent.trim());
             }
           } else {
             // There should be no reason for multi-tds in a tr unless it's combined, right?
             if (td.length === 1) {
-              definitions.push(td.item(0).textContent);
+              definitions.push(td.item(0).textContent.trim());
             } else {
               console.debug("Strange td behavior: " + row.outerHTML);
             }
@@ -232,7 +241,7 @@ function onMouseOver(event) {
         entries.push(phraseObj);
         entries.push(singleObj);
       } else {
-        // I don't think there is ever only just the combined definition, but in case that is the case, there is this
+        // I don't think the combined definition will be present along, but in case that is the case, there is this
         entries.push(phraseObj);
       }
     } else {
@@ -246,14 +255,13 @@ function onMouseOver(event) {
     console.error("Error retrieving definition table");
   }
   
-  // Should get the child elements of this element and parse them to get the relevant information
   // Relevant informationwill be the word that was hovered over and anything that came up in the table when the word was peeked at
 
   // Send words to extension
   
 }
 
-console.debug("Testing PeekCopy extension");
+console.debug("PeekCopy extension");
 
 var wordElements = [];
 var online = false;

@@ -9,12 +9,12 @@
   "page_action" :
   {
     "default_icon": "images/icon38.png",
-    "default_title": "TEST"
+    "default_title": "PeekCopier"
   },
   "content_scripts": [
     {
       "matches":["http://www.duolingo.com/skill/*"],
-      "js": ["test.js"]
+      "js": ["skillContentScript.js"]
     }
   ],
   "permissions": [

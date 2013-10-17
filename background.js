@@ -10,7 +10,7 @@ chrome.tabs.onUpdated.addListener(checkForValidUrl);
 
 // Open page when page action is clicked
 chrome.pageAction.onClicked.addListener(function(disregard) {
-  var pageUrl = chrome.extension.getURL('test.html');
+  var pageUrl = chrome.extension.getURL('index.html');
   //console.log(pageUrl);
   chrome.tabs.query({ "url": pageUrl }, function(results) {
     var found = false;

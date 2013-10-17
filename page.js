@@ -34,22 +34,25 @@ function parseWords(words) {
   var defSeparator = "/";
   var wordDefSeparator = ",";
 
-  for (var i = 0; i < words.length; i++) {
-    // This is where I would change behavior based on settings
-    // I kind of skimped on testing assumptions here
-    // TODO: Fix above
-    var entry = words[i];
-    var word = entry.word;
-    if (defsPerEntry > (entry.defs.size - 1)) {
-      var defs = entry.defs;
-    } else {
-      var defs = entry.defs.slice(defsPerEntry - 1);
+  if (words) {
+    for (var i = 0; i < words.length; i++) {
+      // This is where I would change behavior based on settings
+      // I kind of skimped on testing assumptions here
+      // TODO: Fix above
+      var entry = words[i];
+      var word = entry.word;
+      if (defsPerEntry > (entry.defs.size - 1)) {
+        var defs = entry.defs;
+      } else {
+        var defs = entry.defs.slice(0, defsPerEntry);
+      }
+      var defString = defs.join(defSeparator);
+      var entryString = word + wordDefSeparator + defString;
+      entries.push(entryString);
+      console.log(entryString);
     }
-    var defString = defs.join(defSeparator);
-    var entryString = word + wordDefSeparator + defString;
-    entries.push(entryString);
-    console.log(entryString);
   }
+  
   return entries;
 }
 
