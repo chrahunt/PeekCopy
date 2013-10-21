@@ -5,12 +5,23 @@ function checkForValidUrl(tabId, changeInfo, tab) {
   }
 }
 
+// Default options
+function optionDefaults(data) {
+  var defaults = { defN: 2, defSep: "/", separator: ",", newWords: false, lowercase: false };
+  if (!data["options"]) {
+    console.debug("No options present, setting defaults.");
+    store.set({"options": defaults});
+  } else {
+    console.debug("Options present.")
+  }
+}
+
 // Listen for any changes to the URL of any tab.
 chrome.tabs.onUpdated.addListener(checkForValidUrl);
 
 // Open page when page action is clicked
 chrome.pageAction.onClicked.addListener(function(disregard) {
-  var pageUrl = chrome.extension.getURL('index.html');
+  var pageUrl = chrome.extension.getURL('words.html');
   //console.log(pageUrl);
   chrome.tabs.query({ "url": pageUrl }, function(results) {
     var found = false;
@@ -56,3 +67,4 @@ chrome.runtime.onConnect.addListener(function(port) {
 });
 
 var store = chrome.storage.local;
+store.get("options", optionDefaults);

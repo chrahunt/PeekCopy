@@ -1,10 +1,10 @@
 {
   "manifest_version": 2,
   "name": "PeekCopier",
-  "version": "1.1",
-  "description": "This extension is supposed to text the capability of a chrome extension",
+  "version": "0.1",
+  "description": "This extension records which words you 'peek' at in DuoLingo and makes them available in a format that is easy to import into a flash card program",
   "background": {
-    "scripts": ["background.js"]
+    "scripts": ["js/background.js"]
   },
   "page_action" :
   {
@@ -14,11 +14,12 @@
   "content_scripts": [
     {
       "matches":["http://www.duolingo.com/skill/*"],
-      "js": ["skillContentScript.js"]
+      "js": ["js/skillContentScript.js"]
     }
   ],
   "permissions": [
     "tabs",
     "storage"
-  ]
+  ],
+  "options_page": "options.html"
 }

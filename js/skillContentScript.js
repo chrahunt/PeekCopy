@@ -145,13 +145,16 @@ function onMouseOver(event) {
   // Remove the onmouseover listener from the element so it can't be invoked again, which would send more data
   this.removeEventListener("mouseover", onMouseOver, false);
   var highlighted = this.textContent.trim();
-
+  var newWord = false;
   console.log("Got: " + highlighted);
+
+  if (this.classList.contains("highlighted-new-word")) {
+    newWord = true;
+  }
 
   // If all goes well this XPathResult will have an HTMLTableElement corresponding to the data in the popup section
   var sibling = document.evaluate("./following-sibling::span/div[@class='inner']/div[@class='content']/table", this, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null);
   
-  //console.log("result type: " + sibling.resultType);
   if (sibling) {
     var table = sibling.singleNodeValue;
     var combined = false;
@@ -235,9 +238,9 @@ function onMouseOver(event) {
 
     if (combined) {
       var phrase = phraseWords.join(" ");
-      var phraseObj = { "word": phrase, "defs": combinedDefinitions };
+      var phraseObj = { "word": phrase, "defs": combinedDefinitions, "new": newWord };
       if (singleDefinitions.length > 0) {
-        var singleObj = { "word": highlighted, "defs": singleDefinitions };
+        var singleObj = { "word": highlighted, "defs": singleDefinitions, "new": newWord };
         entries.push(phraseObj);
         entries.push(singleObj);
       } else {
@@ -245,7 +248,7 @@ function onMouseOver(event) {
         entries.push(phraseObj);
       }
     } else {
-      var obj = { "word": highlighted, "defs": definitions };
+      var obj = { "word": highlighted, "defs": definitions, "new": newWord };
       entries.push(obj);
     }
 
@@ -253,12 +256,7 @@ function onMouseOver(event) {
     port.postMessage({ data: entries });
   } else {
     console.error("Error retrieving definition table");
-  }
-  
-  // Relevant informationwill be the word that was hovered over and anything that came up in the table when the word was peeked at
-
-  // Send words to extension
-  
+  }  
 }
 
 console.debug("PeekCopy extension");
